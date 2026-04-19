@@ -1,0 +1,6 @@
+[project]
+name = "NumCompute"
+version = "0.1.0"
+description = "An end-to-end Machine Learning Toolkit."
+authors = [{ name = "Kunal Kuamr" }]
+keywords = ["AI", "Python", "Machine Learning"]

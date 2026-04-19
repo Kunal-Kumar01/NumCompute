@@ -1,0 +1,11 @@
+# Build artifacts
+build/
+
+# Packaging metadata
+*.egg-info/
+NumCompute.egg-info/
+
+# Test/cache artifacts
+.pytest_cache/
+__pycache__/
+*.py[cod]
