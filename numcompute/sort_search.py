@@ -2,6 +2,7 @@
 
 Implements sorting algorithms, top-k selection, quickselect,
 and binary search using vectorised NumPy operations.
+All functions operate on 1-D arrays as per module specification.
 """
 
 import numpy as np
@@ -10,30 +11,24 @@ import numpy as np
 def argsort(arr: np.ndarray, ascending: bool = True) -> np.ndarray:
     """Return indices that would sort the array.
 
-    Parameters
-    ----------
-    arr : np.ndarray, shape (n,)
-        Input 1-D array.
-    ascending : bool
-        If True, sort smallest to largest. Default True.
+    Args:
+        arr (np.ndarray): Input 1-D array, shape (n,).
+        ascending (bool): If True sort smallest to largest. Default True.
 
-    Returns
-    -------
-    np.ndarray, shape (n,)
-        Indices that sort arr.
+    Returns:
+        np.ndarray: Indices that sort arr, shape (n,).
 
-    Raises
-    ------
-    ValueError
-        If arr is not 1-D.
+    Raises:
+        ValueError: If arr is not 1-D.
 
-    Complexity
-    ----------
-    Time: O(n log n)  Space: O(n)
+    Complexity:
+        Time: O(n log n)  Space: O(n)
     """
     arr = np.asarray(arr)
     if arr.ndim != 1:
-        raise ValueError(f"Expected 1-D array, got shape {arr.shape}.")
+        raise ValueError(
+            f"sort_search functions operate on 1-D arrays only, got shape {arr.shape}."
+        )
     indices = np.argsort(arr, kind="stable")
     return indices if ascending else indices[::-1]
 
@@ -41,146 +36,119 @@ def argsort(arr: np.ndarray, ascending: bool = True) -> np.ndarray:
 def sort(arr: np.ndarray, ascending: bool = True) -> np.ndarray:
     """Return a sorted copy of the array.
 
-    Parameters
-    ----------
-    arr : np.ndarray, shape (n,)
-        Input 1-D array.
-    ascending : bool
-        Sort direction. Default True.
+    Args:
+        arr (np.ndarray): Input 1-D array, shape (n,).
+        ascending (bool): Sort direction. Default True.
 
-    Returns
-    -------
-    np.ndarray, shape (n,)
-        Sorted array (copy, original unchanged).
+    Returns:
+        np.ndarray: Sorted copy of arr, shape (n,).
 
-    Raises
-    ------
-    ValueError
-        If arr is not 1-D.
+    Raises:
+        ValueError: If arr is not 1-D.
 
-    Complexity
-    ----------
-    Time: O(n log n)  Space: O(n)
+    Complexity:
+        Time: O(n log n)  Space: O(n)
     """
     arr = np.asarray(arr)
     if arr.ndim != 1:
-        raise ValueError(f"Expected 1-D array, got shape {arr.shape}.")
+        raise ValueError(
+            f"sort_search functions operate on 1-D arrays only, got shape {arr.shape}."
+        )
     sorted_arr = np.sort(arr, kind="stable")
     return sorted_arr if ascending else sorted_arr[::-1]
 
 
-def top_k(arr: np.ndarray, k: int) -> tuple[np.ndarray, np.ndarray]:
-    """Return the k largest values and their indices.
+def top_k(arr: np.ndarray, k: int) -> tuple:
+    """Return the k largest values and their original indices.
 
-    Uses np.argpartition for O(n) average complexity — faster
-    than a full sort for large arrays.
+    Uses np.argpartition for O(n) average partitioning, then sorts
+    only the k candidates — faster than a full sort for large arrays.
 
-    Parameters
-    ----------
-    arr : np.ndarray, shape (n,)
-        Input 1-D array.
-    k : int
-        Number of top elements to return. Must satisfy 1 <= k <= n.
+    Args:
+        arr (np.ndarray): Input 1-D array, shape (n,).
+        k (int): Number of top elements. Must satisfy 1 <= k <= n.
 
-    Returns
-    -------
-    values : np.ndarray, shape (k,)
-        The k largest values, sorted descending.
-    indices : np.ndarray, shape (k,)
-        Their positions in the original array.
+    Returns:
+        tuple:
+            values (np.ndarray): k largest values, sorted descending, shape (k,).
+            indices (np.ndarray): Their positions in the original array, shape (k,).
 
-    Raises
-    ------
-    ValueError
-        If arr is not 1-D or k is out of range.
+    Raises:
+        ValueError: If arr is not 1-D, empty, or k is out of range.
 
-    Complexity
-    ----------
-    Time: O(n + k log k)  Space: O(k)
+    Complexity:
+        Time: O(n + k log k)  Space: O(k)
     """
     arr = np.asarray(arr, dtype=float)
     if arr.ndim != 1:
-        raise ValueError(f"Expected 1-D array, got shape {arr.shape}.")
+        raise ValueError(
+            f"sort_search functions operate on 1-D arrays only, got shape {arr.shape}."
+        )
     n = arr.shape[0]
     if n == 0:
         raise ValueError("Array must not be empty.")
     if not (1 <= k <= n):
         raise ValueError(f"k={k} is out of valid range [1, {n}].")
 
-    # argpartition guarantees the k largest are in the last k slots
     partition_indices = np.argpartition(arr, -k)[-k:]
-    # sort those k elements descending
     order = np.argsort(arr[partition_indices])[::-1]
     top_indices = partition_indices[order]
     return arr[top_indices], top_indices
 
 
 def quickselect(arr: np.ndarray, k: int) -> float:
-    """Return the k-th smallest value (0-indexed) without full sort.
+    """Return the k-th smallest value (0-indexed) without a full sort.
 
-    Uses NumPy's partition for an efficient O(n) average solution.
+    Uses np.partition internally for O(n) average performance.
 
-    Parameters
-    ----------
-    arr : np.ndarray, shape (n,)
-        Input 1-D array.
-    k : int
-        0-based index of the order statistic (0 = minimum).
+    Args:
+        arr (np.ndarray): Input 1-D array, shape (n,).
+        k (int): 0-based rank of the desired order statistic (0 = minimum).
 
-    Returns
-    -------
-    float
-        The k-th smallest element.
+    Returns:
+        float: The k-th smallest element.
 
-    Raises
-    ------
-    ValueError
-        If arr is not 1-D, empty, or k is out of range.
+    Raises:
+        ValueError: If arr is not 1-D, empty, or k is out of range.
 
-    Complexity
-    ----------
-    Time: O(n) average  Space: O(n)
+    Complexity:
+        Time: O(n) average  Space: O(n)
     """
     arr = np.asarray(arr, dtype=float)
     if arr.ndim != 1:
-        raise ValueError(f"Expected 1-D array, got shape {arr.shape}.")
+        raise ValueError(
+            f"sort_search functions operate on 1-D arrays only, got shape {arr.shape}."
+        )
     n = arr.shape[0]
     if n == 0:
         raise ValueError("Array must not be empty.")
     if not (0 <= k < n):
         raise ValueError(f"k={k} is out of valid range [0, {n - 1}].")
 
-    partitioned = np.partition(arr, k)
-    return float(partitioned[k])
+    return float(np.partition(arr, k)[k])
 
 
 def binary_search(arr: np.ndarray, target: float) -> int:
-    """Search for target in a sorted array, return its index or -1.
+    """Search for target in a sorted array and return its index or -1.
 
-    Parameters
-    ----------
-    arr : np.ndarray, shape (n,)
-        Sorted 1-D array (ascending).
-    target : float
-        Value to search for.
+    Args:
+        arr (np.ndarray): Sorted 1-D array in ascending order, shape (n,).
+        target (float): Value to find.
 
-    Returns
-    -------
-    int
-        Index of target in arr, or -1 if not found.
+    Returns:
+        int: Index of target in arr, or -1 if not present.
 
-    Raises
-    ------
-    ValueError
-        If arr is not 1-D.
+    Raises:
+        ValueError: If arr is not 1-D.
 
-    Complexity
-    ----------
-    Time: O(log n)  Space: O(1)
+    Complexity:
+        Time: O(log n)  Space: O(1)
     """
     arr = np.asarray(arr, dtype=float)
     if arr.ndim != 1:
-        raise ValueError(f"Expected 1-D array, got shape {arr.shape}.")
+        raise ValueError(
+            f"sort_search functions operate on 1-D arrays only, got shape {arr.shape}."
+        )
     if arr.shape[0] == 0:
         return -1
 
