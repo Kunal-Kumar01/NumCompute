@@ -114,8 +114,26 @@ vectorised vs. Python-loop implementations.
 
 ## Benchmarks
 
-See [`benchmark/`](benchmark/) for reproducible loop-vs-vectorised comparisons
-and a performance summary.
+Reproducible loop-vs-vectorised comparisons live in [`benchmark/`](benchmark/).
+Run them with:
+
+```bash
+python benchmark/run_benchmarks.py
+```
+
+Sample results (Python 3.14, NumPy 2.4, Windows 10, Intel x64):
+
+| Suite | Inputs | Vectorised (ms) | Loop (ms) | Speedup |
+| --- | --- | ---: | ---: | ---: |
+| Sort | n=100,000 | 1.6 | 17.1 | 10.5x |
+| Mean | n=1,000,000 | 0.8 | 23.5 | 28.0x |
+| Euclidean | n=10,000 | 0.04 | 1.9 | 48.9x |
+| StandardScaler | n=2,000, m=50 | 2.6 | 124.7 | 47.4x |
+| Top-k | n=100,000, k=10 | 0.5 | 15.8 | 32.1x |
+| Softmax | n=100,000 | 1.8 | 21.4 | 11.9x |
+| Rank (avg ties) | n=2,000 | 1.1 | 315.9 | 284.5x |
+
+Full table and environment metadata: [`benchmark/results.md`](benchmark/results.md).
 
 ## Repository layout
 
