@@ -226,3 +226,9 @@ def line_search(
         alpha *= rho
 
     return alpha
+
+
+# Spec-aligned short names. The longer ones above are kept as the canonical
+# implementation; these aliases let user code follow the spec wording exactly.
+grad = finite_diff_gradient
+jacobian = finite_diff_jacobian

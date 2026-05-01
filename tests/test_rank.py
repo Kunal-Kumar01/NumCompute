@@ -92,3 +92,10 @@ def test_percentile_ranks_with_ties_and_nan_keep() -> None:
 
     assert np.isnan(result[2])
     np.testing.assert_allclose(result[[0, 1, 3]], np.array([0.0, 0.0, 100.0]))
+
+
+def test_percentile_is_re_exported_from_rank_module() -> None:
+    """Spec puts `percentile` in rank.py; we re-export it from stats for that path."""
+    from numcompute.rank import percentile as rank_percentile
+    from numcompute.stats import percentile as stats_percentile
+    assert rank_percentile is stats_percentile

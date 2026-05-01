@@ -346,3 +346,8 @@ class FeatureUnion:
     def __repr__(self) -> str:
         step_str = ", ".join(f"('{n}', {type(t).__name__})" for n, t in self.transformer_list)
         return f"FeatureUnion([{step_str}])"
+
+
+# Spec-aligned name. `Compose` is the canonical class above; `Pipeline` is an
+# alias so user code matching the spec example (`Pipeline([...])`) works too.
+Pipeline = Compose

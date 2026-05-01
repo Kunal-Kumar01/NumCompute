@@ -8,6 +8,10 @@ from __future__ import annotations
 
 import numpy as np
 
+# Re-export percentile from stats so the spec's "percentiles in rank.py"
+# wording works as an import path.
+from .stats import percentile  # noqa: F401
+
 
 def rank(
     values: np.ndarray,

@@ -199,17 +199,19 @@ class Imputer:
     """Fill missing (NaN) values using a chosen strategy.
 
     Args:
-        strategy (str): One of 'mean', 'median', 'mode'. Default 'mean'.
+        strategy (str): One of 'mean', 'median', 'mode', 'constant'. Default 'mean'.
+        fill_value (float): Value to use when strategy='constant'. Default 0.0.
 
     Attributes:
         fill_values_ (np.ndarray): Fill value per feature, shape (n_features,).
     """
 
-    def __init__(self, strategy: str = "mean"):
-        valid = {"mean", "median", "mode"}
+    def __init__(self, strategy: str = "mean", fill_value: float = 0.0):
+        valid = {"mean", "median", "mode", "constant"}
         if strategy not in valid:
             raise ValueError(f"strategy must be one of {valid}, got '{strategy}'.")
         self.strategy = strategy
+        self.fill_value = fill_value
         self.fill_values_ = None
 
     def fit(self, X: np.ndarray) -> "Imputer":
@@ -246,6 +248,9 @@ class Imputer:
                 values, counts = np.unique(col, return_counts=True)
                 return values[np.argmax(counts)]
             self.fill_values_ = np.apply_along_axis(_col_mode, 0, X)
+        elif self.strategy == "constant":
+            # Use the provided fill_value for all features
+            self.fill_values_ = np.full(X.shape[1], self.fill_value, dtype=float)
         return self
 
     def transform(self, X: np.ndarray) -> np.ndarray:

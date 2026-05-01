@@ -92,3 +92,17 @@ def test_feature_union_three_transformers():
     ])
     result = fu.fit_transform(X)
     assert result.shape == (8, 6)
+
+
+# ── Pipeline alias ────────────────────────────────────────────────────────────
+
+def test_pipeline_alias_matches_compose():
+    from numcompute import Pipeline
+    assert Pipeline is Compose
+
+def test_pipeline_works_via_alias():
+    from numcompute import Pipeline
+    X = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    pipe = Pipeline([("scaler", StandardScaler())])
+    result = pipe.fit_transform(X)
+    np.testing.assert_allclose(result.mean(axis=0), [0.0, 0.0], atol=1e-10)

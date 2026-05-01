@@ -94,3 +94,14 @@ def test_line_search_invalid_rho_raises():
 def test_line_search_invalid_alpha_raises():
     with pytest.raises(ValueError):
         line_search(lambda x: x[0] ** 2, np.array([1.0]), np.array([-1.0]), alpha=0.0)
+
+
+# ── spec-aligned aliases ─────────────────────────────────────────────────────
+
+def test_grad_alias_matches_finite_diff_gradient():
+    from numcompute import grad
+    assert grad is finite_diff_gradient
+
+def test_jacobian_alias_matches_finite_diff_jacobian():
+    from numcompute import jacobian
+    assert jacobian is finite_diff_jacobian
