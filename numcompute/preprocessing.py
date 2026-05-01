@@ -93,16 +93,29 @@ class StandardScaler:
 
 
 class MinMaxScaler:
-    """Scale features to the [0, 1] range.
+    """Scale features to a configurable range, by default [0, 1].
 
-    Formula: x_scaled = (x - min) / (max - min)
+    Formula: x_scaled = (x - min) / (max - min) * (hi - lo) + lo
+
+    Args:
+        feature_range (tuple of float): Target (lo, hi) range. Default (0.0, 1.0).
 
     Attributes:
-        min_ (np.ndarray): Per-feature minimum, shape (n_features,).
-        max_ (np.ndarray): Per-feature maximum, shape (n_features,).
+        min_ (np.ndarray): Per-feature minimum from training data, shape (n_features,).
+        max_ (np.ndarray): Per-feature maximum from training data, shape (n_features,).
     """
 
-    def __init__(self):
+    def __init__(self, feature_range: tuple = (0.0, 1.0)):
+        if (
+            not isinstance(feature_range, tuple)
+            or len(feature_range) != 2
+            or feature_range[0] >= feature_range[1]
+        ):
+            raise ValueError(
+                f"preprocessing.MinMaxScaler: feature_range must be a (lo, hi) "
+                f"tuple with lo < hi, got {feature_range}."
+            )
+        self.feature_range = feature_range
         self.min_ = None
         self.max_ = None
 
@@ -129,7 +142,7 @@ class MinMaxScaler:
         return self
 
     def transform(self, X: np.ndarray) -> np.ndarray:
-        """Scale X to [0, 1] using fitted min and max.
+        """Scale X into feature_range using fitted min and max.
 
         Args:
             X (np.ndarray): Data to transform, shape (n_samples, n_features).
@@ -148,7 +161,8 @@ class MinMaxScaler:
         X = np.asarray(X, dtype=float)
         scale = self.max_ - self.min_
         scale[scale == 0] = 1.0
-        return (X - self.min_) / scale
+        lo, hi = self.feature_range
+        return (X - self.min_) / scale * (hi - lo) + lo
 
     def fit_transform(self, X: np.ndarray) -> np.ndarray:
         """Fit and transform in one step.
@@ -177,7 +191,8 @@ class MinMaxScaler:
             raise RuntimeError("Call fit() before inverse_transform().")
         scale = self.max_ - self.min_
         scale[scale == 0] = 1.0
-        return np.asarray(X, dtype=float) * scale + self.min_
+        lo, hi = self.feature_range
+        return (np.asarray(X, dtype=float) - lo) / (hi - lo) * scale + self.min_
 
 
 class Imputer:

@@ -68,6 +68,25 @@ def test_minmax_not_fitted_raises():
     with pytest.raises(RuntimeError):
         MinMaxScaler().transform(np.array([[1.0]]))
 
+def test_minmax_custom_feature_range():
+    X = np.array([[1.0], [2.0], [3.0]])
+    result = MinMaxScaler(feature_range=(-1.0, 1.0)).fit_transform(X)
+    np.testing.assert_allclose(result.min(), -1.0)
+    np.testing.assert_allclose(result.max(), 1.0)
+    np.testing.assert_allclose(result[1, 0], 0.0)
+
+def test_minmax_inverse_transform_with_custom_range_round_trips():
+    X = np.array([[1.0, 10.0], [2.0, 20.0], [3.0, 30.0]])
+    scaler = MinMaxScaler(feature_range=(-5.0, 5.0))
+    scaled = scaler.fit_transform(X)
+    np.testing.assert_allclose(scaler.inverse_transform(scaled), X, atol=1e-10)
+
+def test_minmax_invalid_feature_range_raises():
+    with pytest.raises(ValueError, match="feature_range"):
+        MinMaxScaler(feature_range=(1.0, 0.0))
+    with pytest.raises(ValueError, match="feature_range"):
+        MinMaxScaler(feature_range=(0.0, 0.0))
+
 
 # ── Imputer ───────────────────────────────────────────────────────────────────
 
