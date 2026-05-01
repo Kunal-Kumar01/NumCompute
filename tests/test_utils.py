@@ -68,12 +68,13 @@ def test_cosine_shape_mismatch_raises():
 # ── pairwise_distances ────────────────────────────────────────────────────────
 
 def test_pairwise_euclidean_diagonal_zero():
-    X = np.random.rand(4, 3)
+    X = np.random.default_rng(0).random((4, 3))
     D = pairwise_distances(X, metric="euclidean")
-    np.testing.assert_allclose(np.diag(D), 0.0, atol=1e-10)
+    # Diagonal must be exactly zero, not just within tolerance.
+    np.testing.assert_array_equal(np.diag(D), np.zeros(4))
 
 def test_pairwise_euclidean_symmetric():
-    X = np.random.rand(4, 3)
+    X = np.random.default_rng(1).random((4, 3))
     D = pairwise_distances(X, metric="euclidean")
     np.testing.assert_allclose(D, D.T, atol=1e-10)
 
@@ -82,9 +83,23 @@ def test_pairwise_manhattan():
     D = pairwise_distances(X, metric="manhattan")
     assert D[0, 1] == pytest.approx(2.0)
 
+def test_pairwise_cosine_diagonal_zero():
+    X = np.random.default_rng(2).random((5, 3))
+    D = pairwise_distances(X, metric="cosine")
+    np.testing.assert_array_equal(np.diag(D), np.zeros(5))
+
 def test_pairwise_invalid_metric_raises():
     with pytest.raises(ValueError):
         pairwise_distances(np.eye(3), metric="minkowski")
+
+def test_pairwise_distances_handles_non_contiguous_input():
+    # A transposed view is non-contiguous; the function must still produce
+    # the correct distance matrix without relying on contiguous memory.
+    X = np.arange(12, dtype=float).reshape(3, 4).T  # shape (4, 3), non-contiguous
+    assert not X.flags.c_contiguous
+    D = pairwise_distances(X, metric="euclidean")
+    np.testing.assert_array_equal(np.diag(D), np.zeros(4))
+    np.testing.assert_allclose(D, D.T, atol=1e-10)
 
 
 # ── sigmoid ───────────────────────────────────────────────────────────────────
@@ -133,6 +148,25 @@ def test_softmax_large_values_stable():
 def test_softmax_uniform():
     x = np.array([1.0, 1.0, 1.0])
     np.testing.assert_allclose(softmax(x), [1/3, 1/3, 1/3], atol=1e-10)
+
+def test_softmax_2d_along_axis_sums_to_one_per_row():
+    x = np.array([[1.0, 2.0, 3.0], [1000.0, 1000.0, 1000.0]])
+    result = softmax(x, axis=1)
+    np.testing.assert_allclose(result.sum(axis=1), [1.0, 1.0], atol=1e-10)
+    np.testing.assert_allclose(result[1], [1/3, 1/3, 1/3], atol=1e-10)
+
+
+# ── tanh ──────────────────────────────────────────────────────────────────────
+
+def test_tanh_zero_is_zero():
+    np.testing.assert_allclose(tanh(np.array([0.0])), [0.0], atol=1e-12)
+
+def test_tanh_saturates_in_unit_interval():
+    x = np.array([-1000.0, -1.0, 0.0, 1.0, 1000.0])
+    result = tanh(x)
+    assert np.all(result >= -1.0) and np.all(result <= 1.0)
+    assert result[0] == pytest.approx(-1.0, abs=1e-6)
+    assert result[-1] == pytest.approx(1.0, abs=1e-6)
 
 
 # ── logsumexp ─────────────────────────────────────────────────────────────────

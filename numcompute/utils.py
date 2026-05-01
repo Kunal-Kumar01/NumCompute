@@ -160,6 +160,9 @@ def pairwise_distances(
         dist = np.sqrt(
             np.maximum(sq[:, np.newaxis] + sq[np.newaxis, :] - 2.0 * (X @ X.T), 0.0)
         )
+        # matmul vs np.sum use different summation orders, so the diagonal can
+        # leave tiny non-zero residuals. A point is exactly distance 0 from itself.
+        np.fill_diagonal(dist, 0.0)
     elif metric == "manhattan":
         # Vectorised via broadcasting (n, 1, m) - (1, n, m) → (n, n, m)
         dist = np.sum(np.abs(X[:, np.newaxis, :] - X[np.newaxis, :, :]), axis=2)
@@ -168,6 +171,7 @@ def pairwise_distances(
         norms = np.where(norms == 0, 1.0, norms)
         X_norm = X / norms
         dist = 1.0 - (X_norm @ X_norm.T)
+        np.fill_diagonal(dist, 0.0)
 
     return dist
 

@@ -121,3 +121,41 @@ def test_binary_search_last_element():
 
 def test_binary_search_empty_array():
     assert binary_search(np.array([]), 5) == -1
+
+
+# ── edge cases: strides, extremes ────────────────────────────────────────────
+
+def test_sort_handles_non_contiguous_input():
+    # A reverse-step slice is non-contiguous. The function must not assume
+    # contiguous memory.
+    arr = np.arange(10)[::2]  # [0, 2, 4, 6, 8] — view with non-unit stride
+    assert arr.strides[0] != arr.itemsize
+    np.testing.assert_array_equal(sort(arr), np.array([0, 2, 4, 6, 8]))
+
+def test_argsort_handles_non_contiguous_input():
+    arr = np.arange(10)[::-2]  # reverse-step view
+    result = argsort(arr)
+    assert result.shape == arr.shape
+    # Sorted by index order should give monotonic values
+    np.testing.assert_array_equal(arr[result], np.sort(arr))
+
+def test_top_k_extreme_k_one():
+    arr = np.array([3, 1, 4, 1, 5, 9, 2, 6])
+    values, _ = top_k(arr, 1)
+    assert len(values) == 1 and values[0] == 9
+
+def test_top_k_with_all_equal_values():
+    arr = np.array([7, 7, 7, 7, 7])
+    values, indices = top_k(arr, 3)
+    assert len(values) == 3
+    np.testing.assert_array_equal(values, [7, 7, 7])
+
+def test_quickselect_with_all_equal_values():
+    arr = np.array([5, 5, 5, 5, 5])
+    for k in range(arr.size):
+        assert quickselect(arr, k) == 5.0
+
+def test_binary_search_handles_non_contiguous_sorted_input():
+    arr = np.arange(20)[::2]  # [0, 2, 4, ..., 18] — sorted, non-contiguous
+    assert binary_search(arr, 10) == 5
+    assert binary_search(arr, 11) == -1

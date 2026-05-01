@@ -132,3 +132,30 @@ def test_percentile_validation_errors() -> None:
 
     with pytest.raises(ValueError, match="interpolation must be one of"):
         percentile(X, 50, interpolation="cubic")
+
+
+# ── edge cases: strides, all-equal values ────────────────────────────────────
+
+def test_stats_handle_non_contiguous_input() -> None:
+    # Transposed views are non-contiguous; descriptive stats must still work.
+    X = np.arange(12, dtype=float).reshape(3, 4).T
+    assert not X.flags.c_contiguous
+
+    np.testing.assert_allclose(mean(X), np.nanmean(X))
+    np.testing.assert_allclose(std(X), np.nanstd(X))
+    np.testing.assert_array_equal(minimum(X), np.min(X))
+    np.testing.assert_array_equal(maximum(X), np.max(X))
+
+
+def test_std_of_all_equal_values_is_zero() -> None:
+    X = np.full(8, 7.5, dtype=float)
+    assert std(X) == pytest.approx(0.0)
+    # Median and mean of constant array should be the constant itself.
+    assert mean(X) == pytest.approx(7.5)
+    assert median(X) == pytest.approx(7.5)
+
+
+def test_percentile_of_all_equal_values_returns_constant() -> None:
+    X = np.full(5, 42.0, dtype=float)
+    for q in (0, 25, 50, 75, 100):
+        assert percentile(X, q) == pytest.approx(42.0)
