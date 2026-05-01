@@ -33,8 +33,6 @@ def load_data(
         file_path, 
         delimiter=delimiter, 
         skip_header=skip_header,
-        # We have to confirm whether we only have to handle the numeric data type
-        # in the columns of the loaded data type. 
     )
 
     return data
