@@ -2,5 +2,5 @@
 name = "NumCompute"
 version = "0.1.0"
 description = "An end-to-end Machine Learning Toolkit."
-authors = [{ name = "Kunal Kuamr" }]
+authors = [{ name = "Kunal Kuamr" }, {name="Syed Muhammad Raza"}, {name="Rajeshwar S Pandey"}]
 keywords = ["AI", "Python", "Machine Learning"]
